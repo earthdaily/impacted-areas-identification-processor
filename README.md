@@ -246,6 +246,7 @@ Example:
 The following links will provide access to more information:
 - [EarthDaily agro developer portal  ](https://developer.geosys.com/)
 - [Pypi package](https://pypi.org/project/geosyspy/)
+- [Analytic processor template](https://github.com/GEOSYS/Analytic-processor-template)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
