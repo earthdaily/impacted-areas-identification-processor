@@ -30,6 +30,16 @@
 
 <div align="center"></div>
 
+<div align="center">
+  
+[![LinkedIn][linkedin-shield]][linkedin-url]
+[![Twitter][twitter-shield]][twitter-url]
+[![Youtube][youtube-shield]][youtube-url]
+[![Issues][issues-shield]][issues-url]
+[![MIT License][license-shield]][license-url]
+
+</div>
+
 
 <!-- TABLE OF CONTENTS -->
 <details open>
@@ -70,29 +80,19 @@ This directory allows you to run this example both through a notebook and as a l
 
 ### Prerequisite
 
-To be able to run this example, you will need to have following tools to be installed
+ <p align="left">
+Use of this project requires valids credentials from the &ltgeosys/&gt platform . If you need to get trial access, please register <a href=https://earthdailyagro.com/geosys-registration/>here</a>.
+</p>
 
+To be able to run this example, you will need to have following tools installed:
 
+1. Install Conda: please install Conda on your computer. You can download and install it by following the instructions provided on the [official Conda website](https://conda.io/projects/conda/en/latest/user-guide/install/index.html)
 
-1. Install Git
+2. Install Docker Desktop: please install Docker Desktop on your computer. You can download and install it by following the instructions provided on the [official Docker Desktop website](https://docs.docker.com/desktop/)
 
-    Please install Git on your computer. You can download and install it by visiting the [official Git website]    (https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) and following the provided instructions
+3. Install Jupyter Notebook: please install jupyter Notebook on your computer following the instructions provided on the [official Jupyter website](https://jupyter.org/install)
 
-2. Install Conda
-
-    Please install Conda on your computer. You can download and install it by following the instructions provided on the [official Conda website](https://conda.io/projects/conda/en/latest/user-guide/install/index.html)
-
-
-3. Install Docker Desktop
-
-    Please install Docker Desktop on your computer. You can download and install it by following the instructions provided on the [official Docker Desktop website](https://docs.docker.com/desktop/)
-
-4. Install Jupyter Notebook
-
-    Please install jupyter Notebook on your computer. You can install it by following the instructions provided on the official Jupyter website
-
-Make sure you have valid credentials. If you need to get trial access, please register [here](https://earthdailyagro.com/geosys-api/#get-started).
-
+4. Install Git: please install Github on your computer. You can download and install it by visiting <a href=https://desktop.github.com/>here</a> and following the provided instructions
 
 
 This package has been tested on Python 3.9.7.
@@ -119,7 +119,7 @@ To set up the project, follow these steps:
     ```
 3. Fill the environment variable (.env)
 
-Ensure that you populate the .env file with your Geosys APIs credentials. If you haven't acquired the credentials yet, please [click](https://www.earthdaily.com/geosys/geosys-api/) here to obtain them.
+Ensure that you populate the .env file with your Geosys APIs credentials. If you haven't acquired the credentials yet, please [click](https://earthdailyagro.com/geosys-registration) here to obtain them.
 
 ```
 API_CLIENT_ID = <your client id>
@@ -258,7 +258,7 @@ If this project has been useful, that it helped you or your business to save pre
 
 ## License
 
-Distributed under the [GPL 3.0 License](https://www.gnu.org/licenses/gpl-3.0.en.html). 
+Distributed under the [MIT License](https://github.com/GEOSYS/Studies-and-Analysis/blob/main/LICENSE). 
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -279,15 +279,17 @@ For any additonal information, please [email us](mailto:sales@earthdailyagro.com
 <!-- List of available shields https://shields.io/category/license -->
 <!-- List of available shields https://simpleicons.org/ -->
 [contributors-shield]: https://img.shields.io/github/contributors/github_username/repo.svg?style=social
+[NETcore-shield]: https://img.shields.io/badge/.NET%20Core-6.0-green
+[NETcore-url]: https://github.com/dotnet/core
 [contributors-url]: https://github.com/github_username/repo/graphs/contributors
 [forks-shield]: https://img.shields.io/github/forks/github_username/repo.svg?style=plastic&logo=appveyor
 [forks-url]: https://github.com/github_username/repo/network/members
-[stars-shield]: https://img.shields.io/github/stars/qgis-plugin/repo.svg?style=plastic&logo=appveyor
+[stars-shield]: https://img.shields.io/github/stars/impacted-areas-identification/repo.svg?style=plastic&logo=appveyor
 [stars-url]: https://github.com/github_username/repo/stargazers
-[issues-shield]: https://img.shields.io/github/issues/GEOSYS/GeosysPy/repo.svg?style=social
-[issues-url]: https://github.com/github_username/repo/issues
-[license-shield]: https://img.shields.io/github/license/GEOSYS/qgis-plugin
-[license-url]: https://www.gnu.org/licenses/gpl-3.0.en.html
+[issues-shield]: https://img.shields.io/github/issues/GEOSYS/impacted-areas-identification/repo.svg?style=social
+[issues-url]: https://github.com/GEOSYS/impacted-areas-identification/issues
+[license-shield]: https://img.shields.io/badge/License-MIT-yellow.svg
+[license-url]: https://opensource.org/licenses/MIT
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=social&logo=linkedin
 [linkedin-url]: https://www.linkedin.com/company/earthdailyagro/mycompany/
 [twitter-shield]: https://img.shields.io/twitter/follow/EarthDailyAgro?style=social
@@ -298,5 +300,5 @@ For any additonal information, please [email us](mailto:sales@earthdailyagro.com
 [language-python-url]: https://pypi.org/ 
 [GitStars-shield]: https://img.shields.io/github/stars/GEOSYS?style=social
 [GitStars-url]: https://img.shields.io/github/stars/GEOSYS?style=social
-[CITest-shield]: https://img.shields.io/github/workflow/status/GEOSYS/GeosysPy/Continous%20Integration
-[CITest-url]: https://img.shields.io/github/workflow/status/GEOSYS/GeosysPy/Continous%20Integration
+[CITest-shield]: https://img.shields.io/github/workflow/status/GEOSYS/impacted-areas-identification/Continous%20Integration
+[CITest-url]: https://img.shields.io/github/workflow/status/GEOSYS/impacted-areas-identification/Continous%20Integration
