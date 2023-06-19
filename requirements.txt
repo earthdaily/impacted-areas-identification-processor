@@ -8,6 +8,8 @@ requests
 requests-mock
 scipy
 pandas
+rioxarray
+distributed
 geosyspy
 shapely
 xarray
@@ -15,3 +17,7 @@ pyproj
 matplotlib
 fastapi
 hypercorn[trio]==0.14.3
+geojson
+pystac_client
+geopandas
+odc-stac

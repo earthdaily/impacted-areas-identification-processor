@@ -128,6 +128,14 @@ API_USERNAME = <your username>
 API_PASSWORD = <your password>
 ```
 
+To access and use our Catalog STAC named "Skyfox," please ensure that you have the following environment variables set in your .env file:
+
+```
+SKYFOX_URL = https://api.eds.earthdaily.com/archive/v1/stac/v1
+SKYFOX_AUTH_URL = <skyfox auth url>
+SKYFOX_CLIENT_ID =  <your client id>
+SKYFOX_SECRET = <your client id>
+```
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -201,18 +209,47 @@ To set up and run the project using Docker, follow these steps:
     ```
 
 
-This URL will open the Swagger UI documentation, click on the "Try it out" button for the POST endpoint and  enter the request body
+This URL will open the Swagger UI documentation, click on the "Try it out" button under each POST endpoint and enter the request parameters and body
 
+#### POST /impacted-area-based-on-map-reference:
 
-Example: 
+Parameters:
+  - Vegetation Index, ex: "NDVI"
 
+Body Example:
 
 ```json
 { 
   "polygon": "POLYGON((-55.08964959 -12.992576790000001, -55.095571910000004 -12.99349674, -55.09265364 -13.014153310000001, -55.07111016 -13.01013924, -55.07428588 -12.98914779, -55.08261147 -12.99098782, -55.08115233 -13.00152544, -55.08724632 -13.00269622, -55.08819045 -13.0037834, -55.08956371 -13.00369981, -55.08819045 -13.00202724, -55.08964959 -12.992576790000001))",
   "eventDate": "2021-06-07",
-  "threshold": -0.15,
-  "indicator": "ndvi"
+  "threshold": -0.15
+}
+```
+
+#### POST /impacted-area-based-on-stac:
+
+
+Parameters:
+  - Vegetation Index, ex: "NDVI"
+
+Body Example:
+
+```json
+{
+  "sensor_collection": "sentinel-2-l2a",
+  "mask_collection": "sentinel-2-l2a-cog-ag-cloud-mask",
+  "mask_band": [
+    "agriculture-cloud-mask"
+  ],
+  "bands": [
+    "red",
+    "green",
+    "blue",
+    "nir"
+  ],
+  "polygon": "POLYGON((-93.91666293144225 44.46111651063736,-93.94000887870787 44.52430217873475,-93.979834318161 44.518427330078396,-94.01004672050475 44.50814491947311,-94.001806974411 44.471407214671636,-93.99425387382506 44.44641235787428,-93.96953463554381 44.45327475656579,-93.91666293144225 44.46111651063736))",
+  "eventDate": "2021-06-07",
+  "threshold": -0.15
 }
 ```
 
@@ -237,7 +274,9 @@ Example:
     │   │   └── api.py
     │   └───vegetation_index_impacted_areas_identificator
     │       ├── __init__.py
+    │       ├── utils.py
     │       ├── vegetation_index.py
+    │       ├── vegetation_index_calculator.py
     │       └── impacted_areas_identification.py
     └── tests         
 
