@@ -16,6 +16,8 @@ import requests
 import geopandas as gpd
 import odc.stac
 import rioxarray
+import xarray as xr
+from xarray import DataArray, Dataset
 
 from vegetation_index_impacted_areas_identificator.vegetation_index import VegetationIndex
 from vegetation_index_impacted_areas_identificator.vegetation_index_calculator import *
@@ -27,26 +29,20 @@ class ImpactedAreasIdentificator:
 
        Parameters:
        - enum_env (enumerate): The enumeration representing the environment from which the data are retrieved.
-       - enum_region (enumerate): 'Region.NA' or 'Region.EU'
+       - enum_region (enumerate, optional): 'Region.NA' or 'Region.EU' Default is 'Region.NA'
        - priority_queue (str, optional): The priority queue to be used for the analysis ('realtime' or 'bulk'). Defaults to "realtime".
 
        Usage:
        1. Create an instance of the ImpactedAreasIdentificator class by providing the required parameters.
        2. Use the instance to identify and analyze impacted areas based on the provided parameters.
 
-       Example:
-       client_id = "example_client_id"
-       client_secret = "example_client_secret"
-       username = "example_username"
-       password = "example_password"
-       enum_env = enumerate(["env1", "env2", "env3"])
-       enum_region = enumerate(["region1", "region2", "region3"])
 
        # Create an instance of ImpactedAreasIdentificator
-       client = ImpactedAreasIdentificator(client_id, client_secret, username, password, enum_env, enum_region)
+       client = ImpactedAreasIdentificator(enum_env)
 
        # Use the instance to identify and analyze impacted areas based on map reference or catalogue Stac
        client.identify_vi_impacted_area_based_on_map_reference()
+       client.identify_vi_impacted_area_based_on_stac_images()
 
        """
 
@@ -75,7 +71,8 @@ class ImpactedAreasIdentificator:
     def identify_vi_impacted_area_based_on_map_reference(self, polygon: str,
                                                          event_date: dt,
                                                          threshold: float,
-                                                         indicator: VegetationIndex):
+                                                         indicator: VegetationIndex) -> tuple[
+        DataArray, DataArray, DataArray]:
         """
         Identifies the vegetation index (VI) impacted area based on a map reference.
 
@@ -86,6 +83,7 @@ class ImpactedAreasIdentificator:
             indicator (VegetationIndex): The vegetation index.
 
         Returns:
+        - indicator (VegetationIndex): The vegetation index.
         - vi_image_before_event_date (xArray): The VI image before the event date.
         - vi_image_after_event_date (xArray): The VI  image after the event date.
         - impacted_area (xArray): The filtered VI difference based on the provided threshold.
@@ -132,11 +130,12 @@ class ImpactedAreasIdentificator:
     def identify_vi_impacted_area_based_on_stac_images(self, skyfox_params: dict,
                                                        indicator: VegetationIndex,
                                                        threshold: float,
-                                                       max_cloud_cover_percentage: int):
+                                                       max_cloud_cover_percentage: int) -> tuple[Dataset, Dataset, DataArray]:
         """
         Identifies the impacted area based on STAC images using vegetation index.
 
         Parameters:
+            max_cloud_cover_percentage: Maximum cloud cover percentage
             skyfox_params (dict): A dictionary containing Skyfox parameters including sensor collection, bands,
                                   mask collection, mask band, event date, and geometry WKT.
             indicator (VegetationIndex): The vegetation index indicator to use for analysis.
@@ -166,9 +165,10 @@ class ImpactedAreasIdentificator:
         impacted_area = self.calculate_and_filter_vi_difference_by_threshold(vi_before_event_date,
                                                                                 vi_after_event_date, threshold)
         return vi_before_event_date, vi_after_event_date, impacted_area
+
     def find_nearest_dates(self,
                            event_date: dt,
-                           date_list: [dt]):
+                           date_list: [dt]) -> dict[str, dt]:
         """
         Finds the nearest superior and inferior dates to the given event date from a list of dates.
 
@@ -211,7 +211,7 @@ class ImpactedAreasIdentificator:
     def calculate_and_filter_vi_difference_by_threshold(self,
                                                         vi_index_for_image_before_event_date,
                                                         vi_index_for_image_after_event_date,
-                                                        threshold):
+                                                        threshold) -> xr.DataArray:
         """
         Calculates the difference between two Vegetation Index (VI) images and filters the result based on a threshold value.
 
@@ -236,7 +236,7 @@ class ImpactedAreasIdentificator:
     def get_vi_image_time_series(self, polygon: str,
                                  startDate: dt,
                                  endDate: dt,
-                                 indicator: VegetationIndex) -> pd.DataFrame:
+                                 indicator: VegetationIndex) -> DataArray:
         """
         Retrieves the time series of the specified vegetation index satellite images within the specified time range and polygon.
 
@@ -275,13 +275,13 @@ class ImpactedAreasIdentificator:
 
     def calculate_impacted_area(self,
                                 polygon: str,
-                                impacted_area: pd.DataFrame) -> Tuple[float, float]:
+                                impacted_area: DataArray) -> Tuple[float, float]:
         """
                 Calculates the impacted area based on a polygon and an impacted area DataFrame.
 
                 Parameters:
                 - polygon (str): The polygon string representing the geometry of the impacted area.
-                - impacted_area (pd.DataFrame): A DataFrame representing the impacted area.
+                - impacted_area (DataArray): A DataFrame representing the impacted area.
 
                 Returns:
                 - impacted_area (float): The calculated impacted area.
@@ -293,7 +293,7 @@ class ImpactedAreasIdentificator:
         return impacted_area, impacted_area_percentage
 
 
-    def calculate_geometry_image_size(self, raw_datacube: pd.DataFrame) -> int:
+    def calculate_geometry_image_size(self, raw_datacube: Dataset) -> DataArray:
         """
         Calculates the size of the image for a given data cube (without null pixels).
 
@@ -347,7 +347,7 @@ class ImpactedAreasIdentificator:
                                  event_date: str,
                                  geometry_wkt: str,
                                  bands: list[str],
-                                 config=None) -> pd.DataFrame:
+                                 config=None) -> Dataset:
         """
         Retrieves the raw images from a STAC catalog for the specified sensor collection, event date, geometry, and bands.
 
@@ -377,11 +377,12 @@ class ImpactedAreasIdentificator:
                                  event_date: str,
                                  geometry_wkt: str,
                                  mask_band: list[str],
-                                 config=None) -> pd.DataFrame:
+                                 config=None) -> Dataset:
         """
         Retrieves the cloud mask from a STAC catalog for the specified mask collection, event date, geometry, and mask band.
 
         Parameters:
+            mask_band list[str]: The name of the band of mask collection in the STAC catalog
             mask_collection (str): The name of the mask collection in the STAC catalog.
             event_date (str): The date of the event for which the cloud mask images are retrieved before and 6 months after.
             geometry_wkt (str): The Well-Known Text (WKT) representation of the geometry for the area of interest.
@@ -402,8 +403,8 @@ class ImpactedAreasIdentificator:
 
         return mask_datacube
 
-    def apply_cloud_mask_to_raw_images_datacube(self, raw_datacube: pd.DataFrame,
-                                                mask_datacube: pd.DataFrame) -> pd.DataFrame:
+    def apply_cloud_mask_to_raw_images_datacube(self, raw_datacube: Dataset,
+                                                mask_datacube: Dataset) -> Dataset:
         """
         Applies the cloud mask to the raw image data cube.
 
@@ -423,7 +424,7 @@ class ImpactedAreasIdentificator:
                                                  mask_collection: str,
                                                  mask_band: list[str],
                                                  event_date: str,
-                                                 geometry_wkt: str) -> pd.DataFrame:
+                                                 geometry_wkt: str) -> Dataset:
         """
         Retrieves the free cloud images using the STAC catalog for the specified sensor collection, bands, mask collection,
         mask band, event date, and geometry.
@@ -446,9 +447,9 @@ class ImpactedAreasIdentificator:
                                                            config=None)
         return self.apply_cloud_mask_to_raw_images_datacube(raw_image_datacube, cloudmask_datacube)
 
-    def calculate_vi_images_nearest_event_date(self, images_datacube: pd.DataFrame,
+    def calculate_vi_images_nearest_event_date(self, images_datacube: Dataset,
                                                time_index_to_keep: dict,
-                                               indicator: VegetationIndex) -> pd.DataFrame:
+                                               indicator: VegetationIndex) -> Tuple[Dataset, Dataset]:
         """
         Calculates the vegetation index (VI) images for the nearest event date.
 
@@ -467,8 +468,8 @@ class ImpactedAreasIdentificator:
         vi_image_after_eventdate = self.calculate_vegetation_index(image_after_eventdate, indicator)
         return vi_image_before_eventdate, vi_image_after_eventdate
 
-    def calculate_vegetation_index(self, image: pd.DataFrame,
-                                   indicator: VegetationIndex) -> pd.DataFrame:
+    def calculate_vegetation_index(self, image: Dataset,
+                                   indicator: VegetationIndex) -> Dataset:
         """
         Calculates the specified vegetation index for the given image.
 
@@ -517,13 +518,13 @@ class ImpactedAreasIdentificator:
                                     config: str,
                                     geometry_wkt: str,
                                     geometry_geojson,
-                                    resolution=10, crs="epsg:3857") -> pd.DataFrame:
+                                    resolution=10, crs="epsg:3857") -> Dataset:
         """
         Retrieves the clipped images data cube from the provided items collection.
 
         Parameters:
-            items_collection (dict): The collection of STAC items representing the images.
-            selected_bands (list): The selected bands to retrieve from the images.
+            items_collection (str): The collection of STAC items representing the images.
+            selected_bands (list[str]): The selected bands to retrieve from the images.
             config (dict): Additional configuration parameters for the retrieval process.
             geometry_wkt (str): The Well-Known Text (WKT) representation of the geometry for clipping.
             geometry_geojson (GeoJSON): The geometry in GeoJSON format for clipping.
@@ -548,9 +549,9 @@ class ImpactedAreasIdentificator:
             .where(lambda x: x != 0)
         return ds_clipped
 
-    def get_nearest_event_date_time_indces(self, datacube: pd.DataFrame,
+    def get_nearest_event_date_time_indces(self, datacube: Dataset,
                                            event_date: str,
-                                           max_cloud_cover_percentage: int) -> dict[str, str]:
+                                           max_cloud_cover_percentage: int) -> dict[str, dt]:
         """
         Returns the time indices of images with cloud cover percentage within the provided AOI and TOI.
 
@@ -564,16 +565,15 @@ class ImpactedAreasIdentificator:
         """
 
         time_index_to_keep = {}
-        # datacube = datacube.sortby('time')
         for time_value in datacube.sel(time=slice((event_date + dt.timedelta(days=1)).date(), None)).time:
             cloud_free_percentage = datacube['red'].sel(time=time_value).notnull().sum() / datacube["raw_image_size"]
-            if cloud_free_percentage > max_cloud_cover_percentage*0.01:
+            if cloud_free_percentage > max_cloud_cover_percentage * 0.01:
                 time_index_to_keep['after_event_date'] = time_value.values
                 break
 
         for time_value in datacube.sel(time=slice(None, (event_date + dt.timedelta(days=-1)).date())).time[::-1]:
             cloud_free_percentage = datacube['red'].sel(time=time_value).notnull().sum() / datacube["raw_image_size"]
-            if cloud_free_percentage > 1 - max_cloud_cover_percentage*0.01:
+            if cloud_free_percentage > 1 - max_cloud_cover_percentage * 0.01:
                 time_index_to_keep['before_event_date'] = time_value.values
                 break
 
