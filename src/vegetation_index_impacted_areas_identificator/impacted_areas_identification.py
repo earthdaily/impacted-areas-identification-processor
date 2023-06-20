@@ -77,7 +77,7 @@ class ImpactedAreasIdentificator:
         Identifies the vegetation index (VI) impacted area based on a map reference.
 
         Parameters:
-        - polygon (str): The polygon representing the geometry in Well-Known Text (WKT) format.
+        - geometry (str): The geometry representing the geometry in Well-Known Text (WKT) format.
         - event_date (datetime): The event date for which the analysis is performed.
         - threshold (float): The threshold value used for filtering the vegetation index difference.
             indicator (VegetationIndex): The vegetation index.
@@ -94,18 +94,18 @@ class ImpactedAreasIdentificator:
 
         Usage:
         1. Call the method `identify_vi_impacted_area_based_on_map_reference` on an instance of the ImpactedAreasIdentificator class.
-        2. Provide the polygon representing the map reference.
+        2. Provide the geometry representing the map reference.
         3. Specify the event date for analysis.
         4. Set the threshold value for filtering the vegetation index difference.
         5. Retrieve the resulting VI images and the impacted area.
 
         Example:
-        polygon = "example_polygon"
+        geometry = "example_polygon"
         event_date = datetime.datetime(2023, 5, 15)
         threshold = 0.5
 
         # Call the method to identify VI impacted area
-        vi_image_before, vi_image_after, impacted_area = client.identify_vi_impacted_area_based_on_map_reference(polygon, event_date, threshold, indicator)
+        vi_image_before, vi_image_after, impacted_area = client.identify_vi_impacted_area_based_on_map_reference(geometry, event_date, threshold, indicator)
         """
 
         coverage_info_df, images_references = self.get_image_coverage_info_based_on_map_reference(polygon, event_date)
@@ -192,7 +192,7 @@ class ImpactedAreasIdentificator:
         Retrieves image coverage information and references based on a map reference and event date.
 
         Parameters:
-        - polygon: The polygon representing the map reference for the image coverage.
+        - geometry: The geometry representing the map reference for the image coverage.
         - event_date: The event date for which the image coverage information is retrieved.
 
         Returns:
@@ -231,6 +231,7 @@ class ImpactedAreasIdentificator:
         ds_before = vi_index_for_image_before_event_date.squeeze().drop(
             [var for var in ['time', 'band'] if var in vi_index_for_image_before_event_date.coords])
         vi_difference_result = (ds_after - ds_before).where(~np.logical_or(np.isnan(ds_before), np.isnan(ds_after)))
+        vi_difference_result = vi_difference_result.assign_coords(geometry_size_px=sum(sum(vi_difference_result.notnull())).values)
         return vi_difference_result.where(vi_difference_result < threshold)
 
     def get_vi_image_time_series(self, polygon: str,
@@ -238,16 +239,16 @@ class ImpactedAreasIdentificator:
                                  endDate: dt,
                                  indicator: VegetationIndex) -> DataArray:
         """
-        Retrieves the time series of the specified vegetation index satellite images within the specified time range and polygon.
+        Retrieves the time series of the specified vegetation index satellite images within the specified time range and geometry.
 
         Parameters:
-        - polygon (str): The polygon representing the area of interest for the VI image time series.
+        - geometry (str): The geometry representing the area of interest for the VI image time series.
         - startDate (datetime): The start date of the time range for which the VI images are retrieved.
         - endDate (datetime): The end date of the time range for which the VI images are retrieved.
         - indicator (VegetationIndex); vegetation index
 
         Returns:
-        - vi_image_time_series: The time series of the specified vegetation index satellite images within the specified time range and polygon.
+        - vi_image_time_series: The time series of the specified vegetation index satellite images within the specified time range and geometry.
         """
 
         return self.__client.get_satellite_image_time_series(polygon,
@@ -261,10 +262,10 @@ class ImpactedAreasIdentificator:
     def calculate_geometry_area(self,
                                 polygon: str) -> float:
         """
-        Calculates the area of a given geometry represented by a polygon in WKT format.
+        Calculates the area of a given geometry represented by a geometry in WKT format.
 
         Parameters:
-        - polygon (str): The polygon string representing the geometry for which the area is calculated.
+        - geometry (str): The geometry string representing the geometry for which the area is calculated.
 
         Returns:
         - area (float): The area of the geometry.
@@ -277,10 +278,10 @@ class ImpactedAreasIdentificator:
                                 polygon: str,
                                 impacted_area: DataArray) -> Tuple[float, float]:
         """
-                Calculates the impacted area based on a polygon and an impacted area DataFrame.
+                Calculates the impacted area based on a geometry and an impacted area DataFrame.
 
                 Parameters:
-                - polygon (str): The polygon string representing the geometry of the impacted area.
+                - geometry (str): The geometry string representing the geometry of the impacted area.
                 - impacted_area (DataArray): A DataFrame representing the impacted area.
 
                 Returns:
@@ -288,7 +289,7 @@ class ImpactedAreasIdentificator:
                 - impacted_area_percentage (float): The percentage of the geometry covered by the impacted area.
         """
         geometry_area = self.calculate_geometry_area(polygon)
-        impacted_area_percentage = (sum(sum(impacted_area.notnull())) / impacted_area.size) * 100
+        impacted_area_percentage = (sum(sum(impacted_area.notnull())) / impacted_area.geometry_size_px.values) * 100
         impacted_area = geometry_area * impacted_area_percentage / 100
         return impacted_area, impacted_area_percentage
 
@@ -565,16 +566,16 @@ class ImpactedAreasIdentificator:
         """
 
         time_index_to_keep = {}
-        for time_value in datacube.sel(time=slice((event_date + dt.timedelta(days=1)).date(), None)).time:
-            cloud_free_percentage = datacube['red'].sel(time=time_value).notnull().sum() / datacube["raw_image_size"]
-            if cloud_free_percentage > max_cloud_cover_percentage * 0.01:
-                time_index_to_keep['after_event_date'] = time_value.values
-                break
-
         for time_value in datacube.sel(time=slice(None, (event_date + dt.timedelta(days=-1)).date())).time[::-1]:
             cloud_free_percentage = datacube['red'].sel(time=time_value).notnull().sum() / datacube["raw_image_size"]
             if cloud_free_percentage > 1 - max_cloud_cover_percentage * 0.01:
                 time_index_to_keep['before_event_date'] = time_value.values
+                break
+
+        for time_value in datacube.sel(time=slice((event_date + dt.timedelta(days=1)).date(), None)).time:
+            cloud_free_percentage = datacube['red'].sel(time=time_value).notnull().sum() / datacube["raw_image_size"]
+            if cloud_free_percentage > max_cloud_cover_percentage * 0.01:
+                time_index_to_keep['after_event_date'] = time_value.values
                 break
 
         return time_index_to_keep

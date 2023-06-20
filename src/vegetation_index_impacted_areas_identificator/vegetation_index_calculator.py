@@ -14,13 +14,13 @@ class NDVI(VegetationIndexCalculator):
 
 class EVI(VegetationIndexCalculator):
     def calculate(self, image):
-        return 2.5 * ((image['nir'] - image['red']) / (image['nir'] + 6 * image['red'] - 7.5 * image['blue'] + 1)).rename("EVI")
+        raise NotImplementedError("EVI calculation function is not yet implemented")
 
 
 class GNDVI (VegetationIndexCalculator):
     def calculate(self, image):
-        return ((image['nir'] - image['green']) / (image['nir'] + image['green'])).rename("GNDVI")
+        raise NotImplementedError("GNDVI calculation function is not yet implemented")
 
 class CVI (VegetationIndexCalculator):
     def calculate(self, image):
-        return (image['nir']*(image['red']/image['green'])).rename("CVI")
+        raise NotImplementedError("CVI calculation function is not yet implemented")
