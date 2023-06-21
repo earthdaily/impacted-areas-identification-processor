@@ -14,13 +14,13 @@ class NDVI(VegetationIndexCalculator):
 
 class EVI(VegetationIndexCalculator):
     def calculate(self, image):
-        raise NotImplementedError("EVI calculation function is not yet implemented")
+        raise NotImplementedError("EVI calculation is not implemented")
 
 
 class GNDVI (VegetationIndexCalculator):
     def calculate(self, image):
-        raise NotImplementedError("GNDVI calculation function is not yet implemented")
+        raise NotImplementedError("GNDVI calculation is not implemented")
 
 class CVI (VegetationIndexCalculator):
     def calculate(self, image):
-        raise NotImplementedError("CVI calculation function is not yet implemented")
+        raise NotImplementedError("CVI calculation is not implemented")
