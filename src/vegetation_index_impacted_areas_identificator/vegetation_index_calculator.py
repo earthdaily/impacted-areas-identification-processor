@@ -24,3 +24,11 @@ class GNDVI (VegetationIndexCalculator):
 class CVI (VegetationIndexCalculator):
     def calculate(self, image):
         raise NotImplementedError("CVI calculation is not implemented")
+
+class NDWI (VegetationIndexCalculator):
+    def calculate(self, image):
+        raise NotImplementedError("NDWI calculation is not implemented")
+
+class LAI (VegetationIndexCalculator):
+    def calculate(self, image):
+        raise NotImplementedError("LAI calculation is not implemented")

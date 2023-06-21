@@ -117,6 +117,7 @@ class ImpactedAreasIdentificator:
                                                                      nearest_event_date["after_event_date"],
                                                                      indicator)
 
+
         vi_image_before_event_date = \
             vi_images_nearest_event_date.sel(time=str(nearest_event_date["before_event_date"]))[indicator]
         vi_image_after_event_date = \
@@ -251,13 +252,21 @@ class ImpactedAreasIdentificator:
         - vi_image_time_series: The time series of the specified vegetation index satellite images within the specified time range and geometry.
         """
 
-        return self.__client.get_satellite_image_time_series(polygon,
+        vi_image_time_series = self.__client.get_satellite_image_time_series(polygon,
                                                              startDate,
                                                              endDate,
                                                              collections=[SatelliteImageryCollection.SENTINEL_2,
                                                                           SatelliteImageryCollection.LANDSAT_8,
                                                                           SatelliteImageryCollection.LANDSAT_9],
                                                              indicators=[indicator])
+
+        if (len(vi_image_time_series.coords.keys()) == 0):
+            raise ValueError(
+                f"No {indicator} images time series found !")
+        return vi_image_time_series
+
+
+
 
     def calculate_geometry_area(self,
                                 polygon: str) -> float:
@@ -489,6 +498,10 @@ class ImpactedAreasIdentificator:
             index = CVI()
         elif indicator == VegetationIndex.GNDVI:
             index = GNDVI()
+        elif indicator == VegetationIndex.NDWI:
+            index = NDWI()
+        elif indicator == VegetationIndex.LAI:
+            index = LAI()
 
         else:
             raise ValueError("Invalid vegetation index indicator.")

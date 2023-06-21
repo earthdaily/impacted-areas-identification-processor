@@ -62,7 +62,7 @@ async def swagger_ui_html():
     )
 
 
-@app.post("/impacted-area-based-on-map-reference")
+@app.post("/impacted-area-based-on-map-reference", tags=["Analytic Computation"])
 async def impacted_areas_identification_based_on_map_reference(item: MapReferenceItem,
                                                                indicator: VegegetationIndexCodes.codes):
     event_date = dt.datetime(item.eventDate.year, item.eventDate.month, item.eventDate.day)
@@ -85,7 +85,7 @@ async def impacted_areas_identification_based_on_map_reference(item: MapReferenc
         return {f"An unexpected error occurred: {e}"}
 
 
-@app.post("/impacted-area-based-on-stac")
+@app.post("/impacted-area-based-on-stac", tags=["Analytic Computation"])
 async def impacted_areas_identification_based_on_stac(item: StacItem,
                                                       indicator: VegegetationIndexCodes.codes):
     event_date = dt.datetime(item.eventDate.year, item.eventDate.month, item.eventDate.day)
