@@ -159,7 +159,7 @@ class ImpactedAreasIdentificator:
                                                                         event_date=event_date,
                                                                         geometry_wkt=geometry_wkt,
                                                                         bands=bands)
-        time_to_keep = self.get_nearest_event_date_time_indces(images_datacube, event_date, max_cloud_cover_percentage)
+        time_to_keep = self.get_nearest_event_date_time_indices(images_datacube, event_date, max_cloud_cover_percentage)
 
         vi_before_event_date, vi_after_event_date = self.calculate_vi_images_nearest_event_date(
             images_datacube, time_to_keep, indicator)
@@ -490,22 +490,17 @@ class ImpactedAreasIdentificator:
         Returns:
             index_image (xarray.Dataset): The calculated vegetation index image.
         """
-        if indicator == VegetationIndex.NDVI:
-            index = NDVI()
-        elif indicator == VegetationIndex.EVI:
-            index = EVI()
-        elif indicator == VegetationIndex.CVI:
-            index = CVI()
-        elif indicator == VegetationIndex.GNDVI:
-            index = GNDVI()
-        elif indicator == VegetationIndex.NDWI:
-            index = NDWI()
-        elif indicator == VegetationIndex.LAI:
-            index = LAI()
-
-        else:
-            raise ValueError("Invalid vegetation index indicator.")
-
+        indicator_map = {
+            VegetationIndex.NDVI: NDVI(),
+            VegetationIndex.EVI: EVI(),
+            VegetationIndex.CVI: CVI(),
+            VegetationIndex.GNDVI: GNDVI(),
+            VegetationIndex.NDWI: NDWI(),
+            VegetationIndex.LAI: LAI(),
+        }
+        index = indicator_map.get(indicator)
+        if index is None:
+            raise ValueError("Invalid vegetation indicator.")
         return index.calculate(image)
 
     def calculate_date_range(self, event_date: str) -> str:
@@ -563,9 +558,9 @@ class ImpactedAreasIdentificator:
             .where(lambda x: x != 0)
         return ds_clipped
 
-    def get_nearest_event_date_time_indces(self, datacube: Dataset,
-                                           event_date: str,
-                                           max_cloud_cover_percentage: int) -> dict[str, dt]:
+    def get_nearest_event_date_time_indices(self, datacube: Dataset,
+                                            event_date: str,
+                                            max_cloud_cover_percentage: int) -> dict[str, dt]:
         """
         Returns the time indices of images with cloud cover percentage within the provided AOI and TOI.
 
