@@ -152,7 +152,7 @@ To use the project with Jupyter Notebook, follow these steps:
 1. Create a Conda environment:
 
     ```
-    conda create -y --name demo
+    conda create -y --name demo python=3.9
     ```
 
 
