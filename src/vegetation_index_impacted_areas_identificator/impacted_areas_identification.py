@@ -70,7 +70,7 @@ class ImpactedAreasIdentificator:
 
     def identify_vi_impacted_area_based_on_map_reference(self, polygon: str,
                                                          event_date: dt,
-                                                         min_duration:int,
+                                                         min_duration :int,
                                                          threshold: float,
                                                          indicator: VegetationIndex) -> tuple[
         DataArray, DataArray, DataArray]:
@@ -185,14 +185,20 @@ class ImpactedAreasIdentificator:
             - "before_event_date": The nearest inferior date to the event date.
             - "after_event_date": The nearest superior date to the event date.
         """
+
+        
+
         list_inferior = filter(lambda x: x < event_date, date_list)
         nearest_superior = min(filter(lambda x: x > event_date, date_list))
+
         for date_before in list_inferior:
             difference = nearest_superior - date_before
             if difference.days>=min_duration:
                 nearest_inferior = date_before
+                break
         if 'nearest_inferior' not in locals():
             nearest_inferior = max(filter(lambda x: x < event_date, date_list))
+        print(nearest_inferior,nearest_superior)
         return {"before_event_date": nearest_inferior, "after_event_date": nearest_superior}
 
     def get_image_coverage_info_based_on_map_reference(self,
