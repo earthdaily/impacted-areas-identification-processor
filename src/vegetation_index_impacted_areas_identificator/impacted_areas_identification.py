@@ -70,6 +70,7 @@ class ImpactedAreasIdentificator:
 
     def identify_vi_impacted_area_based_on_map_reference(self, polygon: str,
                                                          event_date: dt,
+                                                         min_duration:int,
                                                          threshold: float,
                                                          indicator: VegetationIndex) -> tuple[
         DataArray, DataArray, DataArray]:
@@ -110,7 +111,7 @@ class ImpactedAreasIdentificator:
 
         coverage_info_df, images_references = self.get_image_coverage_info_based_on_map_reference(polygon, event_date)
         image_date_list = pd.to_datetime(coverage_info_df['image.date']).dt.date
-        nearest_event_date = self.find_nearest_dates(event_date.date(), image_date_list)
+        nearest_event_date = self.find_nearest_dates(event_date.date(),min_duration, image_date_list)
 
         vi_images_nearest_event_date = self.get_vi_image_time_series(polygon,
                                                                      nearest_event_date["before_event_date"],
@@ -169,12 +170,14 @@ class ImpactedAreasIdentificator:
 
     def find_nearest_dates(self,
                            event_date: dt,
+                           min_duration:int,
                            date_list: [dt]) -> dict[str, dt]:
         """
         Finds the nearest superior and inferior dates to the given event date from a list of dates.
 
         Parameters:
         - event_date: The event date for which the nearest dates are determined.
+        - min_duration: Minimum number of days between dates to find the nearest dates.
         - date_list: A list of dates to search for the nearest superior and inferior dates.
 
         Returns:
@@ -182,8 +185,14 @@ class ImpactedAreasIdentificator:
             - "before_event_date": The nearest inferior date to the event date.
             - "after_event_date": The nearest superior date to the event date.
         """
+        list_inferior = filter(lambda x: x < event_date, date_list)
         nearest_superior = min(filter(lambda x: x > event_date, date_list))
-        nearest_inferior = max(filter(lambda x: x < event_date, date_list))
+        for date_before in list_inferior:
+            difference = nearest_superior - date_before
+            if difference.days>=min_duration:
+                nearest_inferior = date_before
+        if 'nearest_inferior' not in locals():
+            nearest_inferior = max(filter(lambda x: x < event_date, date_list))
         return {"before_event_date": nearest_inferior, "after_event_date": nearest_superior}
 
     def get_image_coverage_info_based_on_map_reference(self,
