@@ -77,7 +77,11 @@ async def impacted_areas_identification_based_on_map_reference(item: MapReferenc
         vi_difference_filtered = json.dumps(
             xr.where(np.isnan(vi_difference_filtered), None, vi_difference_filtered).to_dict(),
             default=serialize_datetime)
+        before_event_date = vi_before_event_date.time.values
+        after_event_date = vi_after_event_date.time.values
         return {
+            "Before event date":f'{pd.DatetimeIndex([before_event_date]).year[0]}-{pd.DatetimeIndex([before_event_date]).month[0]}-{pd.DatetimeIndex([before_event_date]).day[0]}',
+            "After event date":f'{pd.DatetimeIndex([after_event_date]).year[0]}-{pd.DatetimeIndex([after_event_date]).month[0]}-{pd.DatetimeIndex([after_event_date]).day[0]}',
             "Impacted area": '{:.3f} m²'.format(impacted_area),
             "Impacted area percentage": '{:.2f} %'.format(impacted_area_percentage),
             f"Impacted area {selected_vi.value}": vi_difference_filtered}
