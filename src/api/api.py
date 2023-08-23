@@ -22,6 +22,7 @@ class MapReferenceItem(BaseModel):
     geometry: str = Field(...,
                           example="POLYGON((-93.96113724989586 44.473577981244325,-93.95521493239097 44.474925388980246,-93.95049424452476 44.473057383559784,-93.94929261488609 44.4702093257966,-93.94903512282066 44.46641169924883,-93.95272584242515 44.46604417388972,-93.96010728163414 44.46616668259985,-93.96233887953453 44.46849429924204,-93.96113724989586 44.473577981244325))")
     eventDate: dt.date = Field(..., example="2022-09-15")
+    minDuration : int = Field(...,example=10)
     threshold: float = Field(..., example=-0.15)
 
 
@@ -71,7 +72,7 @@ async def impacted_areas_identification_based_on_map_reference(item: MapReferenc
         selected_vi = get_enum_member_from_name(VegetationIndex, indicator.name)
 
         vi_before_event_date, vi_after_event_date, vi_difference_filtered = client.identify_vi_impacted_area_based_on_map_reference(
-            item.geometry, event_date, item.threshold, selected_vi.value)
+            item.geometry, event_date,item.minDuration, item.threshold, selected_vi.value)
         impacted_area, impacted_area_percentage = client.calculate_impacted_area(item.geometry, vi_difference_filtered)
         vi_difference_filtered = json.dumps(
             xr.where(np.isnan(vi_difference_filtered), None, vi_difference_filtered).to_dict(),
