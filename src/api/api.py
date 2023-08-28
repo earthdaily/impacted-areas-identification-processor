@@ -79,9 +79,9 @@ async def impacted_areas_identification_based_on_map_reference(item: MapReferenc
             default=serialize_datetime)
         before_event_date = vi_before_event_date.time.values
         after_event_date = vi_after_event_date.time.values
-        if type(before_event_date)==list:
-            before_event_date=before_event_date[0]
-        if type(after_event_date)==list:
+        if before_event_date.size>1:
+            before_event_date=before_event_date[-1]
+        if after_event_date.size>1:
             after_event_date=after_event_date[0]
         return {
             "Before event date":f'{pd.DatetimeIndex([before_event_date]).year[0]}-{pd.DatetimeIndex([before_event_date]).month[0]}-{pd.DatetimeIndex([before_event_date]).day[0]}',
