@@ -67,7 +67,9 @@
 
 <p> The aim of this project is to help our customers valuing &ltgeosys/&gt platform capabilities to build their own analytic of interest. </p>
 
-This directory exposes an example of code that will enable you to retrieve an impacted area from an event date and a threshold. It highlights the ability to retrieve a product time series in [xarray](https://docs.xarray.dev/en/stable/) format. 
+The purpose of this example is to assess the impact of an event on an area of interest (i.e drought, fire, high precipitations). Once the date of event and the threshold are set, a difference map based on the required products (NDVI, EVI etc.) is provided. This allows to better locate the impacted areas, thus support in the decision making process to recover from the event.
+
+It highlights the ability to retrieve a product time series in [xarray](https://docs.xarray.dev/en/stable/) format. 
 
 This directory allows you to run this example both through a notebook and as a local application on your machine. 
  
@@ -152,7 +154,7 @@ To use the project with Jupyter Notebook, follow these steps:
 1. Create a Conda environment:
 
     ```
-    conda create -y --name demo python=3.9
+    conda create -y --name demo
     ```
 
 
