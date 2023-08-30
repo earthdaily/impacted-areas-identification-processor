@@ -34,6 +34,7 @@ class StacItem(BaseModel):
     geometry: str = Field(...,
                           example="POLYGON((-93.96113724989586 44.473577981244325,-93.95521493239097 44.474925388980246,-93.95049424452476 44.473057383559784,-93.94929261488609 44.4702093257966,-93.94903512282066 44.46641169924883,-93.95272584242515 44.46604417388972,-93.96010728163414 44.46616668259985,-93.96233887953453 44.46849429924204,-93.96113724989586 44.473577981244325))")
     eventDate: dt.date = Field(..., example="2022-09-15")
+    minDuration : int = Field(...,example=10)
     threshold: float = Field(..., example=-0.15)
 
 
@@ -79,15 +80,13 @@ async def impacted_areas_identification_based_on_map_reference(item: MapReferenc
             default=serialize_datetime)
         before_event_date = vi_before_event_date.time.values
         after_event_date = vi_after_event_date.time.values
-        if before_event_date.size>1:
+        if type(before_event_date)==np.ndarray or before_event_date.size>1 :
             before_event_date=before_event_date[-1]
-        if after_event_date.size>1:
+        if type(after_event_date)==np.ndarray or after_event_date.size>1 :
             after_event_date=after_event_date[0]
         return {
             "Before event date":f'{pd.DatetimeIndex([before_event_date]).year[0]}-{pd.DatetimeIndex([before_event_date]).month[0]}-{pd.DatetimeIndex([before_event_date]).day[0]}',
             "After event date":f'{pd.DatetimeIndex([after_event_date]).year[0]}-{pd.DatetimeIndex([after_event_date]).month[0]}-{pd.DatetimeIndex([after_event_date]).day[0]}',
-            # 'Before event date' :f'{before_event_date}',
-            # 'After event date' :f'{after_event_date}',
             "Impacted area percentage": '{:.2f} %'.format(impacted_area_percentage),
             f"Impacted area {selected_vi.value}": vi_difference_filtered}
     except Exception as e:
@@ -104,6 +103,7 @@ async def impacted_areas_identification_based_on_stac(item: StacItem,
         'mask_collection': item.mask_collection,
         'mask_band': item.mask_band,
         'event_date': event_date,
+        'min_duration':item.minDuration,
         'geometry_wkt': item.geometry,
         'bands': item.bands}
 

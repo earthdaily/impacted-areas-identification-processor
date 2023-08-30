@@ -80,6 +80,7 @@ class ImpactedAreasIdentificator:
         Parameters:
         - geometry (str): The geometry representing the geometry in Well-Known Text (WKT) format.
         - event_date (datetime): The event date for which the analysis is performed.
+        - min_duration (int) : Minimum days number between two dates to perform the analysis.
         - threshold (float): The threshold value used for filtering the vegetation index difference.
             indicator (VegetationIndex): The vegetation index.
 
@@ -154,13 +155,14 @@ class ImpactedAreasIdentificator:
         mask_band = skyfox_params['mask_band']
         event_date = skyfox_params['event_date']
         geometry_wkt = skyfox_params['geometry_wkt']
+        min_duration = skyfox_params['min_duration']
         images_datacube = self.get_free_cloud_images_using_stac_catalog(sensor_collection=sensor_collection,
                                                                         mask_collection=mask_collection,
                                                                         mask_band=mask_band,
                                                                         event_date=event_date,
                                                                         geometry_wkt=geometry_wkt,
                                                                         bands=bands)
-        time_to_keep = self.get_nearest_event_date_time_indices(images_datacube, event_date, max_cloud_cover_percentage)
+        time_to_keep = self.get_nearest_event_date_time_indices(images_datacube, event_date, min_duration, max_cloud_cover_percentage)
 
         vi_before_event_date, vi_after_event_date = self.calculate_vi_images_nearest_event_date(
             images_datacube, time_to_keep, indicator)
@@ -575,6 +577,7 @@ class ImpactedAreasIdentificator:
 
     def get_nearest_event_date_time_indices(self, datacube: Dataset,
                                             event_date: str,
+                                            min_duration: int,
                                             max_cloud_cover_percentage: int) -> dict[str, dt]:
         """
         Returns the time indices of images with cloud cover percentage within the provided AOI and TOI.
@@ -582,6 +585,7 @@ class ImpactedAreasIdentificator:
         Args:
             datacube (xarray): A list of image data.
             event_date (str): The date of the event.
+            min_duration (int) : Minimum days number between two dates to perform the analysis.
             max_cloud_cover_percentage (int): The maximum allowed cloud cover percentage.
 
         Returns:
@@ -589,16 +593,18 @@ class ImpactedAreasIdentificator:
         """
 
         time_index_to_keep = {}
-        for time_value in datacube.sel(time=slice(None, (event_date + dt.timedelta(days=-1)).date())).time[::-1]:
-            cloud_free_percentage = datacube['red'].sel(time=time_value).notnull().sum() / datacube["raw_image_size"]
-            if cloud_free_percentage > 1 - max_cloud_cover_percentage * 0.01:
-                time_index_to_keep['before_event_date'] = time_value.values
-                break
-
         for time_value in datacube.sel(time=slice((event_date + dt.timedelta(days=1)).date(), None)).time:
             cloud_free_percentage = datacube['red'].sel(time=time_value).notnull().sum() / datacube["raw_image_size"]
             if cloud_free_percentage > max_cloud_cover_percentage * 0.01:
                 time_index_to_keep['after_event_date'] = time_value.values
                 break
+            
+        date_before = dt.datetime.utcfromtimestamp(int(time_value.time.values - np.timedelta64(min_duration,'D'))/1e9)
 
+        for time_value in datacube.sel(time=slice(None, (date_before).date())).time[::-1]:
+            cloud_free_percentage = datacube['red'].sel(time=time_value).notnull().sum() / datacube["raw_image_size"]
+            if cloud_free_percentage > 1 - max_cloud_cover_percentage * 0.01:
+                time_index_to_keep['before_event_date'] = time_value.values
+                break
+            
         return time_index_to_keep
