@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: impacted-areas-identification-processor
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: impacted-areas-identification-processor
+  template:
+    metadata:
+      labels:
+        app: impacted-areas-identification-processor
+    spec:
+      containers:
+      - image: regdock01.azurecr.io/impacted-areas-identification-processor:v1.0.0
+        name: impacted-areas-identification-processor
+        env: 
+        - name: RUN_MODE_ENV
+          value: "API"  
+        ports:
+        - containerPort: 80
+      imagePullSecrets:
+        - name: acr-secrets

@@ -1,3 +1,4 @@
+# external requirements
 click
 Sphinx
 coverage
@@ -7,17 +8,20 @@ python-dotenv>=0.5.1
 requests
 requests-mock
 scipy
-pandas
-rioxarray
-distributed
-geosyspy
 shapely
+rasterio
 xarray
 pyproj
 matplotlib
 fastapi
 hypercorn[trio]==0.14.3
-geojson
-pystac_client
-geopandas
-odc-stac
+zarr
+pydantic
+prometheus-client
+python-multipart
+PyJWT
+cryptography
+geosyspy==0.2.1
+byoa
+numpy
+psutil

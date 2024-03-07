@@ -1,15 +1,22 @@
-FROM continuumio/miniconda3:4.10.3 
-EXPOSE 80
-RUN pip install --upgrade pip==23.1.2
-RUN pip cache purge 
 
+FROM continuumio/miniconda3:23.10.0-1
+EXPOSE 80
+
+RUN pip install --upgrade pip==22.0.4
+RUN conda clean --all
+RUN pip cache purge
+
+WORKDIR /app
 
 COPY ./requirements.txt .
 RUN pip install -r requirements.txt
 RUN pip cache purge; exit 0
-
+RUN apt-get update && apt-get install -y dos2unix
 COPY ./src .
-COPY ./setup.py .
-COPY ./.env .
+COPY .env .
 
-ENTRYPOINT ["hypercorn", "main:app", "-b", "0.0.0.0:80", "--worker-class", "trio"]
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN dos2unix /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+ENTRYPOINT ["docker-entrypoint.sh"]
